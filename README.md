@@ -1,4 +1,15 @@
 # excel-analyzer
+![image](https://github.com/user-attachments/assets/430fc54e-87e3-47b6-aecb-85900056bc61)
+![image](https://github.com/user-attachments/assets/6ba20b0a-9356-45dc-852d-b1964cd7ed4c)
+![image](https://github.com/user-attachments/assets/4447ca4e-c5e4-4919-b953-9f8b35fc95a4)
+
+
+
+
+
+
+
+
 ## Installation
 
 1. Create a virtual environment:
