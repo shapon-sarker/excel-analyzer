@@ -1,0 +1,120 @@
+{% extends 'excel_app/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>
+                <i class="fas fa-file-excel text-primary me-2"></i>{{ excel_file.filename }}
+            </h2>
+            <a href="{% url 'upload_excel' %}" class="btn btn-primary">
+                <i class="fas fa-upload me-2"></i>Upload Another File
+            </a>
+        </div>
+    </div>
+
+    {% if formulas %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-calculator text-primary me-2"></i>Formulas Found
+                    </h3>
+                    <button class="btn btn-outline-primary btn-sm" onclick="copyAllFormulas()">
+                        <i class="fas fa-copy me-1"></i>Copy All
+                    </button>
+                </div>
+                <div class="formula-list">
+                    {% for formula in formulas %}
+                    <div class="formula-card">
+                        <div class="d-flex justify-content-between">
+                            <strong class="text-primary">{{ formula.cell }}</strong>
+                            <span class="badge bg-light text-dark">Formula</span>
+                        </div>
+                        <code class="d-block mt-2">{{ formula.formula }}</code>
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- Hidden textarea for copying -->
+                <textarea id="formulasCopyArea" style="position: absolute; left: -9999px;" aria-hidden="true">{% for formula in formulas %}{{ formula.cell }}: {{ formula.formula }}
+{% endfor %}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8 mb-4">
+    {% else %}
+    <div class="col-12 mb-4">
+    {% endif %}
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-table text-primary me-2"></i>Excel Data
+                </h3>
+                <div class="table-responsive">
+                    {{ data|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notification for copy success -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i>All formulas copied to clipboard!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyAllFormulas() {
+        const copyArea = document.getElementById('formulasCopyArea');
+        copyArea.select();
+        document.execCommand('copy');
+
+        // Show toast notification
+        const toastElement = document.getElementById('copyToast');
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 2000
+        });
+        toast.show();
+    }
+
+    // Add DataTables for better table functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css';
+        document.head.appendChild(link);
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js';
+        document.body.appendChild(script);
+
+        const jqueryScript = document.createElement('script');
+        jqueryScript.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+        jqueryScript.onload = function() {
+            const datatableScript = document.createElement('script');
+            datatableScript.src = 'https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js';
+            datatableScript.onload = function() {
+                $('#excel-data').DataTable({
+                    pageLength: 10,
+                    responsive: true,
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+                });
+            };
+            document.body.appendChild(datatableScript);
+        };
+        document.body.appendChild(jqueryScript);
+    });
+</script>
+{% endblock %}
